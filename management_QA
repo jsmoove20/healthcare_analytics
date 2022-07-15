@@ -1,0 +1,11 @@
+Questions:
+
+How many extreme cases stay longer than 40 days in each hospital?
+
+SELECT DISTINCT(Hospital_code) AS unique_hosp,
+COUNT("Severity of Illness")
+FROM train_data td 
+WHERE "Severity of Illness" = 'Extreme'
+AND Stay LIKE '%41%' OR '%5%'
+GROUP BY unique_hosp;
+
