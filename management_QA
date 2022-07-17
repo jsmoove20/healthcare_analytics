@@ -9,3 +9,45 @@ WHERE "Severity of Illness" = 'Extreme'
 AND Stay LIKE '%41%' OR '%5%'
 GROUP BY unique_hosp;
 
+What is the average age for each severity of Illness?
+
+avg_age Severity of Illness
+46.18	  Extreme
+39.02	  Minor
+42.57	  Moderate
+
+SELECT AVG(age) as avg_age, 
+"Severity of Illness"
+FROM train_data td 
+WHERE "Severity of Illness" = 'Extreme'
+OR "Severity of Illness" = 'Moderate'
+OR "Severity of Illness" = 'Minor'
+GROUP BY "Severity of Illness";
+
+What is the realationship between:
+- Type of Admission vs. Severity of Illness
+  Corr Coef Using Pearson = No Corr (0.047)
+ SELECT 
+	((tot_sum - (admin_sum * sev_sum / _count)) / sqrt((admin_sum_sq - pow(admin_sum, 2.0) / _count) * (sev_sum_sq - pow(sev_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
+FROM(
+SELECT
+	sum(new_admin::int) AS admin_sum,
+	sum(new_sev::int) AS sev_sum,
+	sum(new_admin::int * new_admin::int) AS admin_sum_sq,
+	sum(new_sev::int * new_sev::int) AS sev_sum_sq,
+	sum(new_admin::int * new_sev::int) AS tot_sum,
+	count(*) as _count
+FROM (SELECT case_id, "Severity of Illness",
+		CASE WHEN "Severity of Illness" = 'Extreme' THEN '3'
+		WHEN "Severity of Illness" = 'Moderate' THEN '2'
+		ELSE '1'
+		END AS new_sev,
+		CASE WHEN "Type of Admission" = 'Trauma' THEN '3'
+		WHEN "Type of Admission" = 'Emergency' THEN '2'
+		ELSE '1'
+		END AS new_admin
+		FROM train_data td) as a
+) as b;
+
+- Age vs. Visitors with Patient
+
