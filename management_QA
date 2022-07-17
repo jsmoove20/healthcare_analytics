@@ -50,4 +50,30 @@ FROM (SELECT case_id, "Severity of Illness",
 ) as b;
 
 - Age vs. Visitors with Patient
+ 	Coer Coef Using Pearong = No Corr (0.074)
+select 
+((tot_sum - (age_sum * vis_sum / _count)) / sqrt((age_sum_sq - pow(age_sum, 2.0) / _count) * (vis_sum_sq - pow(vis_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
+from (
+select
+	sum(new_age::int) AS age_sum,
+	sum(new_vis) AS vis_sum,
+	sum(new_age::int * new_age::int) AS age_sum_sq,
+	sum(new_vis * new_vis) AS vis_sum_sq,
+	sum(new_age::int * new_vis) AS tot_sum,
+	count(*) as _count
+from
+	(select "Visitors with Patient" as new_vis,
+		case when age = '0-10' then '1'
+		when age = '11-20' then '2'
+		when age = '21-30' then '3'
+		when age = '31-40' then '4'
+		when age = '41-50' then '5'
+		when age = '51-60' then '6'
+		when age = '61-70' then '7'
+		when age = '71-80' then '8'
+		when age = '81-90' then '9'
+		else '10'
+		end as new_age
+		from train_data td) as a
+) as b;
 
