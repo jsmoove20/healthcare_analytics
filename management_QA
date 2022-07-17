@@ -77,3 +77,38 @@ from
 		from train_data td) as a
 ) as b;
 
+- Severity of Illness vs. Stay 
+"Corr Coef Using Pearson" = No Corr (0.126)
+
+select 
+((tot_sum - (stay_sum * sev_sum / _count)) / sqrt((stay_sum_sq - pow(stay_sum, 2.0) / _count) * (sev_sum_sq - pow(sev_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
+from(
+	SELECT
+	sum(new_stay::int) AS stay_sum,
+	sum(new_sev::int) AS sev_sum,
+	sum(new_stay::int * new_stay::int) AS stay_sum_sq,
+	sum(new_sev::int * new_sev::int) AS sev_sum_sq,
+	sum(new_stay::int * new_sev::int) AS tot_sum,
+	count(*) as _count
+from(
+	select 
+	case when stay = '0-10' then '1'
+	when stay = '11-20' then '2'
+	when stay = '21-30' then '3'
+	when stay = '31-40' then '4'
+	when stay = '41-50' then '5'
+	when stay = '51-60' then '6'
+	when stay = '61-70' then '7'
+	when stay = '71-80' then '8'
+	when stay = '81-90' then '9'
+	when stay = '91-100' then '10'
+	else '11'
+	end as new_stay,
+	CASE WHEN "Severity of Illness" = 'Extreme' THEN '3'
+		WHEN "Severity of Illness" = 'Moderate' THEN '2'
+		ELSE '1'
+		END AS new_sev
+	from train_data td) as a
+) as b;
+
+
