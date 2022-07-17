@@ -2,113 +2,113 @@ Questions:
 
 How many extreme cases stay longer than 40 days in each hospital?
 
-SELECT DISTINCT(Hospital_code) AS unique_hosp,
-COUNT("Severity of Illness")
-FROM train_data td 
-WHERE "Severity of Illness" = 'Extreme'
-AND Stay LIKE '%41%' OR '%5%'
-GROUP BY unique_hosp;
+	SELECT DISTINCT(Hospital_code) AS unique_hosp,
+	COUNT("Severity of Illness")
+	FROM train_data td 
+	WHERE "Severity of Illness" = 'Extreme'
+	AND Stay LIKE '%41%' OR '%5%'
+	GROUP BY unique_hosp;
 
 What is the average age for each severity of Illness?
 
-avg_age Severity of Illness
-46.18	  Extreme
-39.02	  Minor
-42.57	  Moderate
+	avg_age Severity of Illness
+	46.18	  Extreme
+	39.02	  Minor
+	42.57	  Moderate
 
-SELECT AVG(age) as avg_age, 
-"Severity of Illness"
-FROM train_data td 
-WHERE "Severity of Illness" = 'Extreme'
-OR "Severity of Illness" = 'Moderate'
-OR "Severity of Illness" = 'Minor'
-GROUP BY "Severity of Illness";
+	SELECT AVG(age) as avg_age, 
+	"Severity of Illness"
+	FROM train_data td 
+	WHERE "Severity of Illness" = 'Extreme'
+	OR "Severity of Illness" = 'Moderate'
+	OR "Severity of Illness" = 'Minor'
+	GROUP BY "Severity of Illness";
 
 What is the realationship between:
-- Type of Admission vs. Severity of Illness
-  Corr Coef Using Pearson = No Corr (0.047)
- SELECT 
-	((tot_sum - (admin_sum * sev_sum / _count)) / sqrt((admin_sum_sq - pow(admin_sum, 2.0) / _count) * (sev_sum_sq - pow(sev_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
-FROM(
-SELECT
-	sum(new_admin::int) AS admin_sum,
-	sum(new_sev::int) AS sev_sum,
-	sum(new_admin::int * new_admin::int) AS admin_sum_sq,
-	sum(new_sev::int * new_sev::int) AS sev_sum_sq,
-	sum(new_admin::int * new_sev::int) AS tot_sum,
-	count(*) as _count
-FROM (SELECT case_id, "Severity of Illness",
-		CASE WHEN "Severity of Illness" = 'Extreme' THEN '3'
-		WHEN "Severity of Illness" = 'Moderate' THEN '2'
-		ELSE '1'
-		END AS new_sev,
-		CASE WHEN "Type of Admission" = 'Trauma' THEN '3'
-		WHEN "Type of Admission" = 'Emergency' THEN '2'
-		ELSE '1'
-		END AS new_admin
-		FROM train_data td) as a
-) as b;
-
-- Age vs. Visitors with Patient
- 	Coer Coef Using Pearong = No Corr (0.074)
-select 
-((tot_sum - (age_sum * vis_sum / _count)) / sqrt((age_sum_sq - pow(age_sum, 2.0) / _count) * (vis_sum_sq - pow(vis_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
-from (
-select
-	sum(new_age::int) AS age_sum,
-	sum(new_vis) AS vis_sum,
-	sum(new_age::int * new_age::int) AS age_sum_sq,
-	sum(new_vis * new_vis) AS vis_sum_sq,
-	sum(new_age::int * new_vis) AS tot_sum,
-	count(*) as _count
-from
-	(select "Visitors with Patient" as new_vis,
-		case when age = '0-10' then '1'
-		when age = '11-20' then '2'
-		when age = '21-30' then '3'
-		when age = '31-40' then '4'
-		when age = '41-50' then '5'
-		when age = '51-60' then '6'
-		when age = '61-70' then '7'
-		when age = '71-80' then '8'
-		when age = '81-90' then '9'
-		else '10'
-		end as new_age
-		from train_data td) as a
-) as b;
-
-- Severity of Illness vs. Stay 
-"Corr Coef Using Pearson" = No Corr (0.126)
-
-select 
-((tot_sum - (stay_sum * sev_sum / _count)) / sqrt((stay_sum_sq - pow(stay_sum, 2.0) / _count) * (sev_sum_sq - pow(sev_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
-from(
+	- Type of Admission vs. Severity of Illness
+	  Corr Coef Using Pearson = No Corr (0.047)
+	 SELECT 
+		((tot_sum - (admin_sum * sev_sum / _count)) / sqrt((admin_sum_sq - pow(admin_sum, 2.0) / _count) * (sev_sum_sq - pow(sev_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
+	FROM(
 	SELECT
-	sum(new_stay::int) AS stay_sum,
-	sum(new_sev::int) AS sev_sum,
-	sum(new_stay::int * new_stay::int) AS stay_sum_sq,
-	sum(new_sev::int * new_sev::int) AS sev_sum_sq,
-	sum(new_stay::int * new_sev::int) AS tot_sum,
-	count(*) as _count
-from(
+		sum(new_admin::int) AS admin_sum,
+		sum(new_sev::int) AS sev_sum,
+		sum(new_admin::int * new_admin::int) AS admin_sum_sq,
+		sum(new_sev::int * new_sev::int) AS sev_sum_sq,
+		sum(new_admin::int * new_sev::int) AS tot_sum,
+		count(*) as _count
+	FROM (SELECT case_id, "Severity of Illness",
+			CASE WHEN "Severity of Illness" = 'Extreme' THEN '3'
+			WHEN "Severity of Illness" = 'Moderate' THEN '2'
+			ELSE '1'
+			END AS new_sev,
+			CASE WHEN "Type of Admission" = 'Trauma' THEN '3'
+			WHEN "Type of Admission" = 'Emergency' THEN '2'
+			ELSE '1'
+			END AS new_admin
+			FROM train_data td) as a
+	) as b;
+
+	- Age vs. Visitors with Patient
+		Coer Coef Using Pearong = No Corr (0.074)
 	select 
-	case when stay = '0-10' then '1'
-	when stay = '11-20' then '2'
-	when stay = '21-30' then '3'
-	when stay = '31-40' then '4'
-	when stay = '41-50' then '5'
-	when stay = '51-60' then '6'
-	when stay = '61-70' then '7'
-	when stay = '71-80' then '8'
-	when stay = '81-90' then '9'
-	when stay = '91-100' then '10'
-	else '11'
-	end as new_stay,
-	CASE WHEN "Severity of Illness" = 'Extreme' THEN '3'
-		WHEN "Severity of Illness" = 'Moderate' THEN '2'
-		ELSE '1'
-		END AS new_sev
-	from train_data td) as a
-) as b;
+	((tot_sum - (age_sum * vis_sum / _count)) / sqrt((age_sum_sq - pow(age_sum, 2.0) / _count) * (vis_sum_sq - pow(vis_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
+	from (
+	select
+		sum(new_age::int) AS age_sum,
+		sum(new_vis) AS vis_sum,
+		sum(new_age::int * new_age::int) AS age_sum_sq,
+		sum(new_vis * new_vis) AS vis_sum_sq,
+		sum(new_age::int * new_vis) AS tot_sum,
+		count(*) as _count
+	from
+		(select "Visitors with Patient" as new_vis,
+			case when age = '0-10' then '1'
+			when age = '11-20' then '2'
+			when age = '21-30' then '3'
+			when age = '31-40' then '4'
+			when age = '41-50' then '5'
+			when age = '51-60' then '6'
+			when age = '61-70' then '7'
+			when age = '71-80' then '8'
+			when age = '81-90' then '9'
+			else '10'
+			end as new_age
+			from train_data td) as a
+	) as b;
+
+	- Severity of Illness vs. Stay 
+	"Corr Coef Using Pearson" = No Corr (0.126)
+
+	select 
+	((tot_sum - (stay_sum * sev_sum / _count)) / sqrt((stay_sum_sq - pow(stay_sum, 2.0) / _count) * (sev_sum_sq - pow(sev_sum, 2.0) / _count))) AS "Corr Coef Using Pearson"
+	from(
+		SELECT
+		sum(new_stay::int) AS stay_sum,
+		sum(new_sev::int) AS sev_sum,
+		sum(new_stay::int * new_stay::int) AS stay_sum_sq,
+		sum(new_sev::int * new_sev::int) AS sev_sum_sq,
+		sum(new_stay::int * new_sev::int) AS tot_sum,
+		count(*) as _count
+	from(
+		select 
+		case when stay = '0-10' then '1'
+		when stay = '11-20' then '2'
+		when stay = '21-30' then '3'
+		when stay = '31-40' then '4'
+		when stay = '41-50' then '5'
+		when stay = '51-60' then '6'
+		when stay = '61-70' then '7'
+		when stay = '71-80' then '8'
+		when stay = '81-90' then '9'
+		when stay = '91-100' then '10'
+		else '11'
+		end as new_stay,
+		CASE WHEN "Severity of Illness" = 'Extreme' THEN '3'
+			WHEN "Severity of Illness" = 'Moderate' THEN '2'
+			ELSE '1'
+			END AS new_sev
+		from train_data td) as a
+	) as b;
 
 
